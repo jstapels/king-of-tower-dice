@@ -1,0 +1,89 @@
+name: Build Release
+run-name: Build release by @${{ github.actor }}
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - module.json
+      - README.md
+      - scripts/**
+      - .github/workflows/main.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Read module manifest
+        id: manifest
+        shell: bash
+        run: |
+          node <<'NODE' >> "$GITHUB_OUTPUT"
+          const fs = require("fs");
+          const manifest = JSON.parse(fs.readFileSync("module.json", "utf8"));
+          console.log(`id=${manifest.id}`);
+          console.log(`version=${manifest.version}`);
+          NODE
+
+      - name: Prepare release manifest
+        shell: bash
+        env:
+          MODULE_ID: ${{ steps.manifest.outputs.id }}
+          VERSION: ${{ steps.manifest.outputs.version }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          mkdir -p dist/package
+          node <<'NODE'
+          const fs = require("fs");
+          const manifest = JSON.parse(fs.readFileSync("module.json", "utf8"));
+          const repo = process.env.REPOSITORY;
+          const version = process.env.VERSION;
+          const moduleId = process.env.MODULE_ID;
+
+          manifest.url = `https://github.com/${repo}`;
+          manifest.manifest = `https://github.com/${repo}/releases/latest/download/module.json`;
+          manifest.download = `https://github.com/${repo}/releases/download/v${version}/${moduleId}.zip`;
+          manifest.readme = `https://github.com/${repo}/blob/main/README.md`;
+
+          fs.writeFileSync("dist/package/module.json", `${JSON.stringify(manifest, null, 2)}\n`);
+          NODE
+
+      - name: Build module archive
+        shell: bash
+        env:
+          MODULE_ID: ${{ steps.manifest.outputs.id }}
+        run: |
+          cp README.md dist/package/README.md
+          cp -R scripts dist/package/scripts
+          cd dist/package
+          zip -r "../${MODULE_ID}.zip" .
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.manifest.outputs.id }}
+          path: |
+            dist/${{ steps.manifest.outputs.id }}.zip
+            dist/package/module.json
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.manifest.outputs.version }}
+          name: v${{ steps.manifest.outputs.version }}
+          body: ${{ github.event.head_commit.message || 'Manual release build' }}
+          fail_on_unmatched_files: true
+          make_latest: true
+          overwrite_files: true
+          files: |
+            dist/package/module.json
+            dist/${{ steps.manifest.outputs.id }}.zip

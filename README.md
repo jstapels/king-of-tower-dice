@@ -1,11 +1,11 @@
 # King of Tower Dice
 
-FoundryVTT v14 module that registers a custom six-sided `KoT` die for Dice So Nice.
+FoundryVTT v14 module that registers a custom six-sided `KoT` die for Dice So Nice 6.1.
 
 ## Usage
 
 1. Place this folder in your Foundry user data `Data/modules/king-of-tower-dice` directory.
-2. Enable both Dice So Nice and King of Tower Dice in your world.
+2. Enable Dice So Nice 6.1.0 or newer and King of Tower Dice in your world.
 3. Roll with:
 
 ```text

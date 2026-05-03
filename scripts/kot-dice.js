@@ -1,5 +1,6 @@
 const MODULE_ID = "king-of-tower-dice";
-const DICE_TYPE = "kot";
+const DICE_DENOMINATION = "KoT";
+const DICE_SO_NICE_TYPE = `d${DICE_DENOMINATION}`;
 const DICE_SHAPE = "d6";
 const DSN_SYSTEM = "king-of-tower";
 const DSN_COLORSET = "king-of-tower-custom";
@@ -120,7 +121,7 @@ function registerSettings() {
 }
 
 export class KoTDie extends foundry.dice.terms.Die {
-  static DENOMINATION = DICE_TYPE;
+  static DENOMINATION = DICE_DENOMINATION;
 
   constructor(termData = {}) {
     super({
@@ -131,13 +132,13 @@ export class KoTDie extends foundry.dice.terms.Die {
   }
 
   get denomination() {
-    return DICE_TYPE;
+    return DICE_DENOMINATION;
   }
 
   get expression() {
     const number = this.number ?? 1;
     const modifiers = this.modifiers?.join("") ?? "";
-    return `${number}d${DICE_TYPE}${modifiers}`;
+    return `${number}d${DICE_DENOMINATION}${modifiers}`;
   }
 
   getResultLabel(result) {
@@ -147,7 +148,7 @@ export class KoTDie extends foundry.dice.terms.Die {
   static matchTerm(expression, { imputeNumber = false } = {}) {
     const numberPattern = imputeNumber ? "\\d*" : "\\d+";
     const pattern = new RegExp(
-      `^(${numberPattern})d?${DICE_TYPE}([^ (){}\\[\\]+\\-*/]*)?(?:\\[([^\\]]+)\\])?$`,
+      `^(${numberPattern})d?${DICE_DENOMINATION}([^ (){}\\[\\]+\\-*/]*)?(?:\\[([^\\]]+)\\])?$`,
       "i"
     );
     return expression.match(pattern);
@@ -167,8 +168,8 @@ export class KoTDie extends foundry.dice.terms.Die {
 }
 
 function registerKoTTerm() {
-  CONFIG.Dice.terms[DICE_TYPE] = KoTDie;
-  CONFIG.Dice.terms[DICE_TYPE.toLowerCase()] = KoTDie;
+  CONFIG.Dice.terms[DICE_DENOMINATION] = KoTDie;
+  CONFIG.Dice.terms[DICE_DENOMINATION.toLowerCase()] = KoTDie;
 
   if (!CONFIG.Dice.types.includes(KoTDie)) CONFIG.Dice.types.push(KoTDie);
 }
@@ -195,7 +196,7 @@ function registerDiceSoNicePreset(dice3d) {
       material: getSetting("material") || SETTING_DEFAULTS.material,
       font: getSetting("font") || SETTING_DEFAULTS.font,
       fontScale: {
-        [DICE_TYPE]: Number(getSetting("fontScale")) || SETTING_DEFAULTS.fontScale
+        [DICE_SO_NICE_TYPE]: Number(getSetting("fontScale")) || SETTING_DEFAULTS.fontScale
       },
       visibility: "visible"
     },
@@ -204,7 +205,7 @@ function registerDiceSoNicePreset(dice3d) {
 
   dice3d.addDicePreset(
     {
-      type: DICE_TYPE,
+      type: DICE_SO_NICE_TYPE,
       labels: getLabels(),
       values: {
         min: 1,
@@ -232,7 +233,7 @@ Hooks.once("ready", () => {
   game.kingOfTowerDice = {
     KoTDie,
     roll: async (number = 1, options = {}) => {
-      const roll = await new Roll(`${Number(number) || 1}d${DICE_TYPE}`).evaluate();
+      const roll = await new Roll(`${Number(number) || 1}d${DICE_DENOMINATION}`).evaluate();
       return roll.toMessage(options);
     }
   };
