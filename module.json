@@ -4,6 +4,12 @@
   "description": "Adds a custom six-sided KoT die for Dice So Nice with configurable labels and colors.",
   "version": "0.1.1",
   "type": "module",
+  "url": "https://github.com/jstapels/king-of-tower-dice",
+  "manifest": "https://github.com/jstapels/king-of-tower-dice/releases/latest/download/module.json",
+  "download": "https://github.com/jstapels/king-of-tower-dice/releases/download/v0.1.1/king-of-tower-dice.zip",
+  "readme": "https://github.com/jstapels/king-of-tower-dice/blob/main/README.md",
+  "bugs": "https://github.com/jstapels/king-of-tower-dice/issues",
+  "media": [],
   "authors": [
     {
       "name": "J. Stapels"
